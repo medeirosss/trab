@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Estrutura para representar uma conta
+typedef struct {
+    int numero;
+    int agencia;
+    float saldo;
+    char tipo[10];
+} Conta;
+
+// Estrutura para representar um nó da FILA
+typedef struct Node {
+    Conta conta;
+    struct Node* proximo;
+} Node;
+
+// Estrutura da FILA
+typedef struct {
+    Node* frente;
+    Node* tras;
+} Fila;
+
+// Função para inicializar uma FILA
+void inicializarFila(Fila* fila) {
+    fila->frente = NULL;
+    fila->tras = NULL;
+}
+
+// Função para verificar se a FILA está vazia
+int filaVazia(Fila* fila) {
+    return fila->frente == NULL;
+}
+
+// Função para inserir uma conta na FILA (Enqueue)
+void inserirConta(Fila* fila, Conta conta) {
+    Node* novoNode = (Node*)malloc(sizeof(Node));
+    if (novoNode == NULL) {
+        printf("Erro ao alocar memória.\n");
+        exit(1);
+    }
+
+    novoNode->conta = conta;
+    novoNode->proximo = NULL;
+
+    if (filaVazia(fila)) {
+        fila->frente = novoNode;
+        fila->tras = novoNode;
+    } else {
+        fila->tras->proximo = novoNode;
+        fila->tras = novoNode;
+    }
+
+    printf("Conta inserida com sucesso!\n");
+}
+
+// Função para remover uma conta da FILA (Dequeue)
+void removerConta(Fila* fila) {
+    if (filaVazia(fila)) {
+        printf("A FILA está vazia.\n");
+    } else {
+        Node* temp = fila->frente;
+        fila->frente = fila->frente->proximo;
+
+        free(temp);
+        printf("Conta removida com sucesso!\n");
+
+        if (fila->frente == NULL) {
+            fila->tras = NULL;
+        }
+    }
+}
+
+// Função para exibir todas as contas na FILA
+void exibirFila(Fila* fila) {
+    if (filaVazia(fila)) {
+        printf("A FILA está vazia.\n");
+    } else {
+        Node* atual = fila->frente;
+        while (atual != NULL) {
+            printf("Numero: %d, Agencia: %d, Saldo: %.2f, Tipo: %s\n",
+                   atual->conta.numero, atual->conta.agencia, atual->conta.saldo, atual->conta.tipo);
+            atual = atual->proximo;
+        }
+    }
+}
+
+// Função para zerar a FILA
+void zerarFila(Fila* fila) {
+    while (!filaVazia(fila)) {
+        removerConta(fila);
+    }
+}
+
+int main() {
+    Fila filaContas;
+    inicializarFila(&filaContas);
+
+    int opcao;
+    do {
+        printf("\nEscolha a opcao\n");
+        printf("0. Sair\n");
+        printf("1. Zerar FILA\n");
+        printf("2. Exibir FILA\n");
+        printf("3. Enqueue - Inserir Conta\n");
+        printf("4. Dequeue - Excluir Conta\n");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                zerarFila(&filaContas);
+                break;
+            case 2:
+                exibirFila(&filaContas);
+                break;
+            case 3: {
+                Conta novaConta;
+                printf("Digite o Numero, Agencia, Saldo e Tipo (Corrente, Poupanca ou Salario): ");
+                scanf("%d %d %f %s", &novaConta.numero, &novaConta.agencia, &novaConta.saldo, novaConta.tipo);
+                inserirConta(&filaContas, novaConta);
+                break;
+            }
+            case 4:
+                removerConta(&filaContas);
+                break;
+            case 0:
+                printf("Encerrando o programa.\n");
+                break;
+            default:
+                printf("Opcao invalida.\n");
+                break;
+        }
+    } while (opcao != 0);
+
+    return 0;
+}
